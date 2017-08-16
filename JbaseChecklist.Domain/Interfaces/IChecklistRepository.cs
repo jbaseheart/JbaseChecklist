@@ -11,5 +11,6 @@ namespace JbaseChecklist.Domain
         ChecklistItem GetCheckListItemById(int id);
         ChecklistItem CreateCheckListItem(ChecklistItem item);
         ChecklistItem UpdateCheckListItem(ChecklistItem item);
+        void Delete(ChecklistItem item);
     }
 }

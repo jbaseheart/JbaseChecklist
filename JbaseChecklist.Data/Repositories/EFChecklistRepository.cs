@@ -37,7 +37,16 @@ namespace JbaseChecklist.Data.Repositories
 
         public ChecklistItem UpdateCheckListItem(ChecklistItem item)
         {
-            throw new NotImplementedException();
+            _context.CheckListItems.Update(item);
+            _context.SaveChanges();
+
+            return item;
+        }
+
+        public void Delete(ChecklistItem item)
+        {
+            _context.CheckListItems.Remove(item);
+            _context.SaveChanges();
         }
     }
 }

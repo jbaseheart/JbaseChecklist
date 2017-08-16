@@ -17,6 +17,11 @@ namespace JbaseChecklist.API.Controllers
         {
             _checklistRepo = checklistRepo;
 
+            CreateDefaultListIfEmpty();
+        }
+
+        private void CreateDefaultListIfEmpty()
+        {
             var allItems = _checklistRepo.GetAllChecklistItems();
 
             if (allItems.Count() == 0)
@@ -39,6 +44,7 @@ namespace JbaseChecklist.API.Controllers
             {
                 return NotFound();
             }
+
             return new ObjectResult(item);
         }
 
@@ -53,6 +59,42 @@ namespace JbaseChecklist.API.Controllers
             var newItem = _checklistRepo.CreateCheckListItem(item);
 
             return CreatedAtRoute("GetCheckListItem", new { id = newItem.Id }, newItem);
+        }
+
+        [HttpPut("{id}")]
+        public IActionResult Update(int id, [FromBody] ChecklistItem item)
+        {
+            if(item == null || item.Id != id)
+            {
+                return BadRequest();
+            }
+
+            var existingItem = _checklistRepo.GetCheckListItemById(id);
+            if(existingItem == null)
+            {
+                return NotFound();
+            }
+
+            existingItem.Description = item.Description;
+            existingItem.IsComplete = item.IsComplete;
+
+            _checklistRepo.UpdateCheckListItem(existingItem);
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}")]
+        public IActionResult Delete(int id)
+        {
+            var item = _checklistRepo.GetCheckListItemById(id);
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            _checklistRepo.Delete(item);
+
+            return new NoContentResult();
         }
 
     }
