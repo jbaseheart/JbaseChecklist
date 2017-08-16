@@ -16,4 +16,9 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JbaseChecklist.Data\JbaseChecklist.Data.csproj" />
+    <ProjectReference Include="..\JbaseChecklist.Domain\JbaseChecklist.Domain.csproj" />
+  </ItemGroup>
+
 </Project>
