@@ -52,7 +52,7 @@ namespace JbaseChecklist.API.Controllers
 
             var newItem = _checklistRepo.CreateCheckListItem(item);
 
-            return CreatedAtRoute("GetTodo", new { id = newItem.Id }, newItem);
+            return CreatedAtRoute("GetCheckListItem", new { id = newItem.Id }, newItem);
         }
 
     }
