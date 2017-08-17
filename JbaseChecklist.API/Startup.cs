@@ -29,7 +29,7 @@ namespace JbaseChecklist.API
             //services.AddDbContext<InMemoryChecklistContext>(opt => opt.UseInMemoryDatabase("JbaseChecklist"));
             //services.AddScoped<IChecklistContext, InMemoryChecklistContext>();
 
-            services.AddDbContext<SqlChecklistContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContextPool<SqlChecklistContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddScoped<IChecklistContext, SqlChecklistContext>();
 
             services.AddScoped<IChecklistRepository, EFChecklistRepository>();
