@@ -7,6 +7,8 @@ using JbaseChecklist.Data.Contexts;
 using JbaseChecklist.Domain;
 using JbaseChecklist.Data.Repositories;
 using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.Extensions.PlatformAbstractions;
+using System.IO;
 
 namespace JbaseChecklist.API
 {
@@ -30,9 +32,14 @@ namespace JbaseChecklist.API
             services.AddMvc();
 
             // Register the Swagger generator
-            services.AddSwaggerGen(c =>
+            services.AddSwaggerGen(opt =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "JbaseChecklist API", Version = "v1" });
+                opt.SwaggerDoc("v1", new Info { Title = "JbaseChecklist API", Version = "v1" });
+
+                //Set the comments path for the swagger json and ui.
+                var basePath = PlatformServices.Default.Application.ApplicationBasePath;
+                var xmlPath = Path.Combine(basePath, "JbaseChecklist.API.xml");
+                opt.IncludeXmlComments(xmlPath);
             });
         }
 
@@ -55,5 +62,7 @@ namespace JbaseChecklist.API
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "JbaseChecklist V1");
             });
         }
+
+
     }
 }
