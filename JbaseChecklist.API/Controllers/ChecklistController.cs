@@ -46,7 +46,7 @@ namespace JbaseChecklist.API.Controllers
         {
             var checklist = _checklistRepo.GetChecklistById(checklistId);
 
-            if (checklist == null || checklist.User.Username != username)
+            if (checklist == null || checklist?.User?.Username != username)
                 return NotFound();
 
             return new ObjectResult(new ChecklistViewModel(checklist));
@@ -98,7 +98,7 @@ namespace JbaseChecklist.API.Controllers
         {
             var checkList = _checklistRepo.GetChecklistById(checklistId);
 
-            if (checkList == null || checkList.User.Username != username)
+            if (checkList == null || checkList?.User?.Username != username)
                 return NotFound();
                         
             var checklistItems = _checklistRepo.GetAllChecklistItemsByChecklistId(checklistId)
@@ -121,7 +121,7 @@ namespace JbaseChecklist.API.Controllers
         {
             var checkList = _checklistRepo.GetChecklistById(checklistId);
 
-            if (checkList == null || checkList.User.Username != username)
+            if (checkList == null || checkList?.User?.Username != username)
                 return NotFound();
 
             var checklistItem = _checklistRepo.GetAllChecklistItemsByChecklistId(checklistId)
@@ -155,7 +155,7 @@ namespace JbaseChecklist.API.Controllers
             }
             
             //verify that this is our own list we're adding to
-            if (checklist.User?.Username != username)
+            if (checklist?.User?.Username != username)
                 return Unauthorized();
             
             var newChecklistItem = _checklistRepo.CreateCheckListItem(new ChecklistItem() {

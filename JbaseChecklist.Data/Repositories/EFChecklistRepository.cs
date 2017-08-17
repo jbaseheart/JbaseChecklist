@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using JbaseChecklist.Domain.Models;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace JbaseChecklist.Data.Repositories
 {
@@ -21,17 +22,23 @@ namespace JbaseChecklist.Data.Repositories
 
         public IEnumerable<User> GetAllUsers()
         {
-            return _context.Users.ToList();
+            return _context.Users
+                .Include(u => u.CheckLists)
+                .ToList();
         }
 
         public User GetUserByUserName(string userName)
         {
-            return _context.Users.FirstOrDefault(u => u.Username == userName);
+            return _context.Users
+                .Include(u => u.CheckLists)
+                .FirstOrDefault(u => u.Username == userName);
         }
         
         public User GetUserByUserId(int userId)
         {
-            return _context.Users.FirstOrDefault(u => u.Id == userId);
+            return _context.Users
+                .Include(u => u.CheckLists)
+                .FirstOrDefault(u => u.Id == userId);
         }
 
         public User CreateUser(User user)
@@ -48,12 +55,19 @@ namespace JbaseChecklist.Data.Repositories
         
         public IEnumerable<Checklist> GetAllChecklistsByUserName(string userName)
         {
-            return _context.CheckLists.Where(cl => cl.User.Username == userName);
+            return _context.CheckLists
+                .Include(cl => cl.User)
+                .Include(cl => cl.ChecklistItems)
+                .Where(cl => cl.User.Username == userName);
         }
 
         public Checklist GetChecklistById(int checklistId)
         {
-            return _context.CheckLists.Where(cl => cl.Id == checklistId).FirstOrDefault();
+            return _context.CheckLists
+                .Include(cl => cl.User)
+                .Include(cl => cl.ChecklistItems)
+                .Where(cl => cl.Id == checklistId)
+                .FirstOrDefault();
         }
 
         public Checklist CreateCheckList(Checklist checklist)
@@ -89,7 +103,11 @@ namespace JbaseChecklist.Data.Repositories
 
         public ChecklistItem GetCheckListItemById(int id)
         {
-            return _context.CheckListItems.Where(t => t.Id == id).FirstOrDefault();
+            return _context.CheckListItems
+                .Include(cli => cli.Checklist)
+                    .ThenInclude(cl => cl.User)
+                .Where(cli => cli.Id == id)
+                .FirstOrDefault();
         }
 
         public ChecklistItem CreateCheckListItem(ChecklistItem item)
