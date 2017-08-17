@@ -8,8 +8,10 @@ namespace JbaseChecklist.Domain.Models
     public class ChecklistItem
     {
         public int Id { get; set; }
+        public int ChecklistId { get; set; }
         public string Description { get; set; }
         public bool IsComplete { get; set; }
 
+        public Checklist Checklist { get; set; }
     }
 }

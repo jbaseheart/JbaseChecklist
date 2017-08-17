@@ -12,6 +12,8 @@ namespace JbaseChecklist.Data.Contexts
             : base(options)
         { }
 
+        public DbSet<User> Users { get; set; }
+        public DbSet<Checklist> CheckLists { get; set; }
         public DbSet<ChecklistItem> CheckListItems { get; set; }
     }
 }

@@ -7,10 +7,22 @@ namespace JbaseChecklist.Domain
 {
     public interface IChecklistRepository
     {
-        IEnumerable<ChecklistItem> GetAllChecklistItems();
+        IEnumerable<User> GetAllUsers();
+        User GetUserByUserName(string userName);
+        User GetUserByUserId(int userId);
+        User CreateUser(User user);        
+
+        IEnumerable<Checklist> GetAllChecklistsByUserName(string userName);
+        Checklist GetChecklistById(int checklistId);
+        Checklist CreateCheckList(Checklist checklist);
+        Checklist UpdateCheckList(Checklist checklist);
+        void DeleteChecklist(Checklist checklist);
+
+
+        IEnumerable<ChecklistItem> GetAllChecklistItemsByChecklistId(int checklistId);
         ChecklistItem GetCheckListItemById(int id);
         ChecklistItem CreateCheckListItem(ChecklistItem item);
         ChecklistItem UpdateCheckListItem(ChecklistItem item);
-        void Delete(ChecklistItem item);
+        void DeleteChecklistItem(ChecklistItem item);
     }
 }

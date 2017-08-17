@@ -17,22 +17,87 @@ namespace JbaseChecklist.Data.Repositories
             _context = context;
         }
 
+        #region Users
+
+        public IEnumerable<User> GetAllUsers()
+        {
+            return _context.Users.ToList();
+        }
+
+        public User GetUserByUserName(string userName)
+        {
+            return _context.Users.FirstOrDefault(u => u.Username == userName);
+        }
+        
+        public User GetUserByUserId(int userId)
+        {
+            return _context.Users.FirstOrDefault(u => u.Id == userId);
+        }
+
+        public User CreateUser(User user)
+        {
+            _context.Users.Add(user);
+            _context.SaveChanges();
+
+            return user;
+        }
+
+        #endregion
+
+        #region Checklists
+        
+        public IEnumerable<Checklist> GetAllChecklistsByUserName(string userName)
+        {
+            return _context.CheckLists.Where(cl => cl.User.Username == userName);
+        }
+
+        public Checklist GetChecklistById(int checklistId)
+        {
+            return _context.CheckLists.Where(cl => cl.Id == checklistId).FirstOrDefault();
+        }
+
+        public Checklist CreateCheckList(Checklist checklist)
+        {
+            _context.CheckLists.Add(checklist);
+            _context.SaveChanges();
+
+            return checklist;
+        }
+
+        public Checklist UpdateCheckList(Checklist checklist)
+        {
+            _context.CheckLists.Update(checklist);
+            _context.SaveChanges();
+
+            return checklist;
+        }
+
+        public void DeleteChecklist(Checklist checklist)
+        {
+            _context.CheckLists.Remove(checklist);
+            _context.SaveChanges();
+        }
+
+        #endregion
+
+        #region ChecklistItems
+                
+        public IEnumerable<ChecklistItem> GetAllChecklistItemsByChecklistId(int checklistId)
+        {
+            return _context.CheckListItems.Where(cli => cli.ChecklistId == checklistId).ToList();
+        }
+
+        public ChecklistItem GetCheckListItemById(int id)
+        {
+            return _context.CheckListItems.Where(t => t.Id == id).FirstOrDefault();
+        }
+
         public ChecklistItem CreateCheckListItem(ChecklistItem item)
         {
             _context.CheckListItems.Add(item);
             _context.SaveChanges();
 
             return item;
-        }
-
-        public ChecklistItem GetCheckListItemById(int id)
-        {
-            return _context.CheckListItems.FirstOrDefault(t => t.Id == id);
-        }
-
-        public IEnumerable<ChecklistItem> GetAllChecklistItems()
-        {
-            return _context.CheckListItems.ToList();
         }
 
         public ChecklistItem UpdateCheckListItem(ChecklistItem item)
@@ -43,10 +108,13 @@ namespace JbaseChecklist.Data.Repositories
             return item;
         }
 
-        public void Delete(ChecklistItem item)
+        public void DeleteChecklistItem(ChecklistItem item)
         {
             _context.CheckListItems.Remove(item);
             _context.SaveChanges();
         }
+
+        #endregion
+
     }
 }

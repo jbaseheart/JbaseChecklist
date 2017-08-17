@@ -3,8 +3,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using JbaseChecklist.Domain;
 using JbaseChecklist.Domain.Models;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using JbaseChecklist.API.ViewModels;
 
 namespace JbaseChecklist.API.Controllers
 {
@@ -17,82 +16,252 @@ namespace JbaseChecklist.API.Controllers
         {
             _checklistRepo = checklistRepo;
 
-            CreateDefaultListIfEmpty();
+            CreateDefaultDataIfEmpty();
         }
 
-        private void CreateDefaultListIfEmpty()
+        private void CreateDefaultDataIfEmpty()
         {
-            var allItems = _checklistRepo.GetAllChecklistItems();
-
-            if (allItems.Count() == 0)
+            var allUsers = _checklistRepo.GetAllUsers();
+            if(allUsers.Count() == 0)
             {
-                _checklistRepo.CreateCheckListItem(new ChecklistItem { Description = "Item1" });
+                var defaultUser = _checklistRepo.CreateUser(new User() { Username = "jbase" });
+
+                var defaultList = _checklistRepo.CreateCheckList(new Checklist()
+                {
+                    Name = "Default Checklist",
+                    Description = "Standard checklist of todo items",
+                    UserId = defaultUser.Id
+                });
+
+                _checklistRepo.CreateCheckList(new Checklist()
+                {
+                    Name = "Additional Checklist",
+                    Description = "Second checklist of todo items",
+                    UserId = defaultUser.Id
+                });
+
+                _checklistRepo.CreateCheckListItem(new ChecklistItem
+                {
+                    Description = "Item1",
+                    ChecklistId = 1
+                });
+
             }
+
         }
 
-        [HttpGet]
-        public IEnumerable<ChecklistItem> GetAll()
+
+        /// <summary>
+        /// Gets all the checklists for a given user
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
+        // GET api/Checklist/{username}
+        [HttpGet("{username}")]
+        public IActionResult GetAllChecklists(string username)
         {
-            return _checklistRepo.GetAllChecklistItems();
+            var checklists = _checklistRepo.GetAllChecklistsByUserName(username)
+                .Select(cl => new ChecklistViewModel(cl));
+
+            return new ObjectResult(checklists);
         }
 
-        [HttpGet("{id}", Name = "GetCheckListItem")]
-        public IActionResult GetById(int id)
+
+        /// <summary>
+        /// Gets a specific checklist with the given checklistId
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <returns></returns>
+        // GET api/Checklist/{username}/{checklistId}
+        [HttpGet("{username}/{checklistId:int}", Name = "GetChecklist")]
+        public IActionResult GetChecklist(string username, int checklistId)
         {
-            var item = _checklistRepo.GetCheckListItemById(id);
-            if (item == null)
-            {
+            var checklist = _checklistRepo.GetChecklistById(checklistId);
+
+            if (checklist == null || checklist.User.Username != username)
                 return NotFound();
-            }
 
-            return new ObjectResult(item);
+            return new ObjectResult(new ChecklistViewModel(checklist));
         }
 
-        [HttpPost]
-        public IActionResult Create([FromBody] ChecklistItem item)
+
+        /// <summary>
+        /// Creates a new checklist
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklist"></param>
+        /// <remarks>Supplying an Id in the body is unnecessary since it will be provided after the checklist is created.
+        /// A valid user is required. Otherwise, a 400 is returned
+        /// </remarks>
+        /// <returns></returns>
+        // POST api/Checklist/{username}
+        [HttpPost("{username}")]
+        public IActionResult CreateChecklist(string username, [FromBody] ChecklistViewModel checklist)
         {
-            if (item == null)
+            var user = _checklistRepo.GetUserByUserName(username);
+
+            if (checklist == null || user == null)
+                return BadRequest();
+
+            var newCheckList = _checklistRepo.CreateCheckList(new Checklist() {
+                UserId = user.Id,
+                Name = checklist.Name,
+                Description = checklist.Description,                
+            });
+
+            return CreatedAtRoute("GetChecklist", new
+            {
+                username = username,
+                checklistId = newCheckList.Id
+            }, new ChecklistViewModel(newCheckList));
+        }
+
+
+        /// <summary>
+        /// Gets all the checklistItems for a given checklistId. 
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <returns></returns>
+        /// <remarks>The checklistId supplied must be for the given user. Otherwise a 404 is returned</remarks>
+        // GET api/Checklist/{username}/{checklistId}/items
+        [HttpGet("{username}/{checklistId:int}/items")]
+        public IActionResult GetAllChecklistItems(string username, int checklistId)
+        {
+            var checkList = _checklistRepo.GetChecklistById(checklistId);
+
+            if (checkList == null || checkList.User.Username != username)
+                return NotFound();
+                        
+            var checklistItems = _checklistRepo.GetAllChecklistItemsByChecklistId(checklistId)
+                .Select(cli => new ChecklistItemViewModel(cli));
+
+            return new ObjectResult(checklistItems);
+        }
+
+
+        /// <summary>
+        /// Gets a specific ChecklistItem with the given checklistItemId
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <param name="checklistItemId"></param>
+        /// <returns></returns>
+        // GET api/Checklist/{username}/{id}/items/{checklistItemId:int}
+        [HttpGet("{username}/{checklistId:int}/items/{checklistItemId:int}", Name = "GetCheckListItem")]
+        public IActionResult GetCheckListItem(string username, int checklistId, int checklistItemId)
+        {
+            var checkList = _checklistRepo.GetChecklistById(checklistId);
+
+            if (checkList == null || checkList.User.Username != username)
+                return NotFound();
+
+            var checklistItem = _checklistRepo.GetAllChecklistItemsByChecklistId(checklistId)
+                .Where(cli => cli.Id == checklistItemId)
+                .Select(cli => new ChecklistItemViewModel(cli))
+                .FirstOrDefault();
+
+            return new ObjectResult(checklistItem);
+        }
+
+
+        /// <summary>
+        /// Creates a new ChecklistItem
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <param name="checklistItem"></param>
+        /// <returns></returns>
+        /// <remarks>Supplying an Id in the body is unnecessary since it will be provided after the checklist is created.
+        /// A valid user is required. Otherwise a 400 is returned.
+        /// </remarks>
+        [HttpPost("{username}/{checklistId:int}/items")]
+        public IActionResult CreateChecklistItem(string username, int checklistId, [FromBody] ChecklistItemViewModel checklistItem)
+        {
+            
+            var checklist = _checklistRepo.GetChecklistById(checklistId);
+
+            if (checklistItem == null || checklist == null)
+            {
+                return BadRequest();
+            }
+            
+            //verify that this is our own list we're adding to
+            if (checklist.User?.Username != username)
+                return Unauthorized();
+            
+            var newChecklistItem = _checklistRepo.CreateCheckListItem(new ChecklistItem() {
+                ChecklistId = checklistId,
+                Description = checklistItem.Description,
+                IsComplete = checklistItem.IsComplete
+            });
+
+            return CreatedAtRoute("GetCheckListItem", new
+            {
+                username = username,
+                checklistId = newChecklistItem.ChecklistId,
+                checklistItemId = newChecklistItem.Id
+            }, new ChecklistItemViewModel(newChecklistItem));
+
+        }
+
+
+        /// <summary>
+        /// Updates an existing ChecklistItem with the given checklistItemId.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <param name="checklistItemId"></param>
+        /// <param name="checklistItem"></param>
+        /// <returns></returns>
+        [HttpPut("{username}/{checklistId:int}/items/{checklistItemId:int}")]
+        public IActionResult UpdateChecklistItem(string username, int checklistId, int checklistItemId, [FromBody] ChecklistItemViewModel checklistItem)
+        {
+            //make sure we have the required params
+            if (checklistItem == null || checklistItem.Id == 0 || checklistItemId != checklistItem.Id)
             {
                 return BadRequest();
             }
 
-            var newItem = _checklistRepo.CreateCheckListItem(item);
+            //find the item
+            var checklistItemToUpdate = _checklistRepo.GetCheckListItemById(checklistItem.Id);
 
-            return CreatedAtRoute("GetCheckListItem", new { id = newItem.Id }, newItem);
-        }
-
-        [HttpPut("{id}")]
-        public IActionResult Update(int id, [FromBody] ChecklistItem item)
-        {
-            if(item == null || item.Id != id)
-            {
-                return BadRequest();
-            }
-
-            var existingItem = _checklistRepo.GetCheckListItemById(id);
-            if(existingItem == null)
-            {
+            if (checklistItemToUpdate == null)
                 return NotFound();
-            }
 
-            existingItem.Description = item.Description;
-            existingItem.IsComplete = item.IsComplete;
+            //make sure we have access to it
+            if (checklistItemToUpdate?.Checklist?.User?.Username != username)
+                return Unauthorized();
 
-            _checklistRepo.UpdateCheckListItem(existingItem);
+            checklistItemToUpdate.Description = checklistItem.Description;
+            checklistItemToUpdate.IsComplete = checklistItem.IsComplete;
+
+            _checklistRepo.UpdateCheckListItem(checklistItemToUpdate);
 
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
-        public IActionResult Delete(int id)
-        {
-            var item = _checklistRepo.GetCheckListItemById(id);
-            if (item == null)
-            {
-                return NotFound();
-            }
 
-            _checklistRepo.Delete(item);
+        /// <summary>
+        /// Deletes an item from a checklist with the given checklistItemId
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <param name="checklistItemId"></param>
+        /// <returns></returns>
+        [HttpDelete("{username}/{checklistId:int}/items/{checklistItemId:int}")]
+        public IActionResult DeleteChecklistItem(string username, int checklistId, int checklistItemId)
+        {
+            var checklistItem = _checklistRepo.GetCheckListItemById(checklistItemId);
+            if (checklistItem == null)
+                return NotFound();
+
+            //make sure we have access to it
+            if (checklistItem?.Checklist?.User?.Username != username)
+                return Unauthorized();
+
+            _checklistRepo.DeleteChecklistItem(checklistItem);
 
             return new NoContentResult();
         }
