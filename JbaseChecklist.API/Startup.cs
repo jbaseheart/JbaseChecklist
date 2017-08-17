@@ -24,9 +24,14 @@ namespace JbaseChecklist.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<ChecklistItemContext>(opt => opt.UseInMemoryDatabase("JbaseChecklist"));
-            services.AddDbContext<InMemoryChecklistContext>(opt => opt.UseInMemoryDatabase("JbaseChecklist"));
-            services.AddScoped<IChecklistContext, InMemoryChecklistContext>();
+            
+            /* You can uncomment this to use the in-memory database context. This is mainly for testing and development */
+            //services.AddDbContext<InMemoryChecklistContext>(opt => opt.UseInMemoryDatabase("JbaseChecklist"));
+            //services.AddScoped<IChecklistContext, InMemoryChecklistContext>();
+
+            services.AddDbContext<SqlChecklistContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<IChecklistContext, SqlChecklistContext>();
+
             services.AddScoped<IChecklistRepository, EFChecklistRepository>();
 
             services.AddMvc();
@@ -44,7 +49,7 @@ namespace JbaseChecklist.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, SqlChecklistContext context)
         {
             if (env.IsDevelopment())
             {
@@ -61,6 +66,9 @@ namespace JbaseChecklist.API
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "JbaseChecklist V1");
             });
+
+            DbInitializer.Initialize(context);
+
         }
 
 

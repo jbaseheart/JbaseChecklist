@@ -15,39 +15,6 @@ namespace JbaseChecklist.API.Controllers
         public ChecklistController(IChecklistRepository checklistRepo)
         {
             _checklistRepo = checklistRepo;
-
-            CreateDefaultDataIfEmpty();
-        }
-
-        private void CreateDefaultDataIfEmpty()
-        {
-            var allUsers = _checklistRepo.GetAllUsers();
-            if(allUsers.Count() == 0)
-            {
-                var defaultUser = _checklistRepo.CreateUser(new User() { Username = "jbase" });
-
-                var defaultList = _checklistRepo.CreateCheckList(new Checklist()
-                {
-                    Name = "Default Checklist",
-                    Description = "Standard checklist of todo items",
-                    UserId = defaultUser.Id
-                });
-
-                _checklistRepo.CreateCheckList(new Checklist()
-                {
-                    Name = "Additional Checklist",
-                    Description = "Second checklist of todo items",
-                    UserId = defaultUser.Id
-                });
-
-                _checklistRepo.CreateCheckListItem(new ChecklistItem
-                {
-                    Description = "Item1",
-                    ChecklistId = 1
-                });
-
-            }
-
         }
 
 
