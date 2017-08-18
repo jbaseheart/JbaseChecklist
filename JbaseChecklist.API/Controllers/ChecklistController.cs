@@ -86,6 +86,70 @@ namespace JbaseChecklist.API.Controllers
 
 
         /// <summary>
+        /// Updates an existing checklist with the given checklistId
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <param name="checklist"></param>
+        /// <returns></returns>
+        [HttpPut("{username}/{checklistId:int}")]
+        public IActionResult UpdateChecklist(string username, int checklistId, [FromBody] ChecklistViewModel checklist)
+        {
+            //make sure we have the required params
+            if (checklist == null || checklist.Id == 0 || checklistId != checklist.Id)
+            {
+                return BadRequest();
+            }
+
+            //find the checklist
+            var checklistToUpdate = _checklistRepo.GetChecklistById(checklist.Id);
+
+            if (checklistToUpdate == null)
+                return NotFound();
+
+            //make sure we have access to it
+            if (checklistToUpdate?.User?.Username != username)
+                return Unauthorized();
+
+            checklistToUpdate.Name = checklist.Name;
+            checklistToUpdate.Description = checklist.Description;            
+
+            _checklistRepo.UpdateCheckList(checklistToUpdate);
+
+            return NoContent();
+        }
+
+
+        /// <summary>
+        /// Deletes a checklist with the given checklistId
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="checklistId"></param>
+        /// <returns></returns>
+        /// <remarks>This will also delete all of the checklistItems in the list before deleting the list</remarks>
+        [HttpDelete("{username}/{checklistId:int}")]
+        public IActionResult DeleteChecklist(string username, int checklistId)
+        {
+            var checklist = _checklistRepo.GetChecklistById(checklistId);
+            if (checklist == null)
+                return NotFound();
+
+            //make sure we have access to it
+            if (checklist?.User?.Username != username)
+                return Unauthorized();
+
+            //delete the items in the list first
+            var itemsToDelete = _checklistRepo.GetAllChecklistItemsByChecklistId(checklist.Id);
+            _checklistRepo.DeleteChecklistItems(itemsToDelete);
+
+            //delete the list
+            _checklistRepo.DeleteChecklist(checklist);
+
+            return new NoContentResult();
+        }
+
+
+        /// <summary>
         /// Gets all the checklistItems for a given checklistId. 
         /// </summary>
         /// <param name="username"></param>
@@ -134,7 +198,7 @@ namespace JbaseChecklist.API.Controllers
 
 
         /// <summary>
-        /// Creates a new ChecklistItem
+        /// Creates a new checklistItem
         /// </summary>
         /// <param name="username"></param>
         /// <param name="checklistId"></param>

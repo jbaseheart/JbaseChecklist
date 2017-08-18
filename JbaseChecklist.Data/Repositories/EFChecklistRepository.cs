@@ -132,6 +132,12 @@ namespace JbaseChecklist.Data.Repositories
             _context.SaveChanges();
         }
 
+        public void DeleteChecklistItems(IEnumerable<ChecklistItem> items)
+        {
+            _context.CheckListItems.RemoveRange(items);
+            _context.SaveChanges();
+        }
+
         #endregion
 
     }
