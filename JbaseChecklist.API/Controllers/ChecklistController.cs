@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using JbaseChecklist.Domain;
 using JbaseChecklist.Domain.Models;
 using JbaseChecklist.API.ViewModels;
+using System.Threading.Tasks;
 
 namespace JbaseChecklist.API.Controllers
 {
@@ -25,11 +26,11 @@ namespace JbaseChecklist.API.Controllers
         /// <returns></returns>
         // GET api/Checklist/{username}
         [HttpGet("{username}")]
-        public IActionResult GetAllChecklists(string username)
+        public async Task<IActionResult> GetAllChecklists(string username)
         {
-            var checklists = _checklistRepo.GetAllChecklistsByUserName(username)
-                .Select(cl => new ChecklistViewModel(cl));
-
+            var checklists = await _checklistRepo.GetAllChecklistsByUserNameAsync(username)
+                .ContinueWith(t => t.Result.Select(cl => new ChecklistViewModel(cl)));
+                
             return new ObjectResult(checklists);
         }
 
@@ -42,9 +43,9 @@ namespace JbaseChecklist.API.Controllers
         /// <returns></returns>
         // GET api/Checklist/{username}/{checklistId}
         [HttpGet("{username}/{checklistId:int}", Name = "GetChecklist")]
-        public IActionResult GetChecklist(string username, int checklistId)
+        public async Task<IActionResult> GetChecklist(string username, int checklistId)
         {
-            var checklist = _checklistRepo.GetChecklistById(checklistId);
+            var checklist = await _checklistRepo.GetChecklistByIdAsync(checklistId);
 
             if (checklist == null || checklist?.User?.Username != username)
                 return NotFound();
@@ -64,14 +65,14 @@ namespace JbaseChecklist.API.Controllers
         /// <returns></returns>
         // POST api/Checklist/{username}
         [HttpPost("{username}")]
-        public IActionResult CreateChecklist(string username, [FromBody] ChecklistViewModel checklist)
+        public async Task<IActionResult> CreateChecklist(string username, [FromBody] ChecklistViewModel checklist)
         {
-            var user = _checklistRepo.GetUserByUserName(username);
+            var user = await _checklistRepo.GetUserByUserNameAsync(username);
 
             if (checklist == null || user == null)
                 return BadRequest();
 
-            var newCheckList = _checklistRepo.CreateCheckList(new Checklist() {
+            var newCheckList = await _checklistRepo.CreateCheckListAsync(new Checklist() {
                 UserId = user.Id,
                 Name = checklist.Name,
                 Description = checklist.Description,                
@@ -93,7 +94,7 @@ namespace JbaseChecklist.API.Controllers
         /// <param name="checklist"></param>
         /// <returns></returns>
         [HttpPut("{username}/{checklistId:int}")]
-        public IActionResult UpdateChecklist(string username, int checklistId, [FromBody] ChecklistViewModel checklist)
+        public async Task<IActionResult> UpdateChecklist(string username, int checklistId, [FromBody] ChecklistViewModel checklist)
         {
             //make sure we have the required params
             if (checklist == null || checklist.Id == 0 || checklistId != checklist.Id)
@@ -102,7 +103,7 @@ namespace JbaseChecklist.API.Controllers
             }
 
             //find the checklist
-            var checklistToUpdate = _checklistRepo.GetChecklistById(checklist.Id);
+            var checklistToUpdate = await _checklistRepo.GetChecklistByIdAsync(checklist.Id);
 
             if (checklistToUpdate == null)
                 return NotFound();
@@ -114,7 +115,7 @@ namespace JbaseChecklist.API.Controllers
             checklistToUpdate.Name = checklist.Name;
             checklistToUpdate.Description = checklist.Description;            
 
-            _checklistRepo.UpdateCheckList(checklistToUpdate);
+            await _checklistRepo.UpdateCheckListAsync(checklistToUpdate);
 
             return NoContent();
         }
@@ -128,9 +129,9 @@ namespace JbaseChecklist.API.Controllers
         /// <returns></returns>
         /// <remarks>This will also delete all of the checklistItems in the list before deleting the list</remarks>
         [HttpDelete("{username}/{checklistId:int}")]
-        public IActionResult DeleteChecklist(string username, int checklistId)
+        public async Task<IActionResult> DeleteChecklist(string username, int checklistId)
         {
-            var checklist = _checklistRepo.GetChecklistById(checklistId);
+            var checklist = await _checklistRepo.GetChecklistByIdAsync(checklistId);
             if (checklist == null)
                 return NotFound();
 
@@ -139,11 +140,11 @@ namespace JbaseChecklist.API.Controllers
                 return Unauthorized();
 
             //delete the items in the list first
-            var itemsToDelete = _checklistRepo.GetAllChecklistItemsByChecklistId(checklist.Id);
-            _checklistRepo.DeleteChecklistItems(itemsToDelete);
+            var itemsToDelete = await _checklistRepo.GetAllChecklistItemsByChecklistIdAsync(checklist.Id);
+            await _checklistRepo.DeleteChecklistItemsAsync(itemsToDelete);
 
             //delete the list
-            _checklistRepo.DeleteChecklist(checklist);
+            await _checklistRepo.DeleteChecklistAsync(checklist);
 
             return new NoContentResult();
         }
@@ -158,15 +159,15 @@ namespace JbaseChecklist.API.Controllers
         /// <remarks>The checklistId supplied must be for the given user. Otherwise a 404 is returned</remarks>
         // GET api/Checklist/{username}/{checklistId}/items
         [HttpGet("{username}/{checklistId:int}/items")]
-        public IActionResult GetAllChecklistItems(string username, int checklistId)
+        public async Task<IActionResult> GetAllChecklistItems(string username, int checklistId)
         {
-            var checkList = _checklistRepo.GetChecklistById(checklistId);
+            var checkList = await _checklistRepo.GetChecklistByIdAsync(checklistId);
 
             if (checkList == null || checkList?.User?.Username != username)
                 return NotFound();
                         
-            var checklistItems = _checklistRepo.GetAllChecklistItemsByChecklistId(checklistId)
-                .Select(cli => new ChecklistItemViewModel(cli));
+            var checklistItems = await _checklistRepo.GetAllChecklistItemsByChecklistIdAsync(checklistId)
+                .ContinueWith(t => t.Result.Select(cli => new ChecklistItemViewModel(cli)));
 
             return new ObjectResult(checklistItems);
         }
@@ -181,17 +182,19 @@ namespace JbaseChecklist.API.Controllers
         /// <returns></returns>
         // GET api/Checklist/{username}/{id}/items/{checklistItemId:int}
         [HttpGet("{username}/{checklistId:int}/items/{checklistItemId:int}", Name = "GetCheckListItem")]
-        public IActionResult GetCheckListItem(string username, int checklistId, int checklistItemId)
+        public async Task<IActionResult> GetCheckListItem(string username, int checklistId, int checklistItemId)
         {
-            var checkList = _checklistRepo.GetChecklistById(checklistId);
+            var checkList = await _checklistRepo.GetChecklistByIdAsync(checklistId);
 
             if (checkList == null || checkList?.User?.Username != username)
                 return NotFound();
 
-            var checklistItem = _checklistRepo.GetAllChecklistItemsByChecklistId(checklistId)
-                .Where(cli => cli.Id == checklistItemId)
-                .Select(cli => new ChecklistItemViewModel(cli))
-                .FirstOrDefault();
+            var checklistItem = await _checklistRepo.GetAllChecklistItemsByChecklistIdAsync(checklistId)
+                .ContinueWith(t => t.Result
+                                    .Where(cli => cli.Id == checklistItemId)
+                                    .Select(cli => new ChecklistItemViewModel(cli))
+                                    .FirstOrDefault()
+                );
 
             return new ObjectResult(checklistItem);
         }
@@ -208,10 +211,10 @@ namespace JbaseChecklist.API.Controllers
         /// A valid user is required. Otherwise a 400 is returned.
         /// </remarks>
         [HttpPost("{username}/{checklistId:int}/items")]
-        public IActionResult CreateChecklistItem(string username, int checklistId, [FromBody] ChecklistItemViewModel checklistItem)
+        public async Task<IActionResult> CreateChecklistItem(string username, int checklistId, [FromBody] ChecklistItemViewModel checklistItem)
         {
             
-            var checklist = _checklistRepo.GetChecklistById(checklistId);
+            var checklist = await _checklistRepo.GetChecklistByIdAsync(checklistId);
 
             if (checklistItem == null || checklist == null)
             {
@@ -222,7 +225,7 @@ namespace JbaseChecklist.API.Controllers
             if (checklist?.User?.Username != username)
                 return Unauthorized();
             
-            var newChecklistItem = _checklistRepo.CreateCheckListItem(new ChecklistItem() {
+            var newChecklistItem = await _checklistRepo.CreateCheckListItemAsync(new ChecklistItem() {
                 ChecklistId = checklistId,
                 Description = checklistItem.Description,
                 IsComplete = checklistItem.IsComplete
@@ -247,7 +250,7 @@ namespace JbaseChecklist.API.Controllers
         /// <param name="checklistItem"></param>
         /// <returns></returns>
         [HttpPut("{username}/{checklistId:int}/items/{checklistItemId:int}")]
-        public IActionResult UpdateChecklistItem(string username, int checklistId, int checklistItemId, [FromBody] ChecklistItemViewModel checklistItem)
+        public async Task<IActionResult> UpdateChecklistItem(string username, int checklistId, int checklistItemId, [FromBody] ChecklistItemViewModel checklistItem)
         {
             //make sure we have the required params
             if (checklistItem == null || checklistItem.Id == 0 || checklistItemId != checklistItem.Id)
@@ -256,7 +259,7 @@ namespace JbaseChecklist.API.Controllers
             }
 
             //find the item
-            var checklistItemToUpdate = _checklistRepo.GetCheckListItemById(checklistItem.Id);
+            var checklistItemToUpdate = await _checklistRepo.GetCheckListItemByIdAsync(checklistItem.Id);
 
             if (checklistItemToUpdate == null)
                 return NotFound();
@@ -268,7 +271,7 @@ namespace JbaseChecklist.API.Controllers
             checklistItemToUpdate.Description = checklistItem.Description;
             checklistItemToUpdate.IsComplete = checklistItem.IsComplete;
 
-            _checklistRepo.UpdateCheckListItem(checklistItemToUpdate);
+            await _checklistRepo.UpdateCheckListItemAsync(checklistItemToUpdate);
 
             return NoContent();
         }
@@ -282,9 +285,9 @@ namespace JbaseChecklist.API.Controllers
         /// <param name="checklistItemId"></param>
         /// <returns></returns>
         [HttpDelete("{username}/{checklistId:int}/items/{checklistItemId:int}")]
-        public IActionResult DeleteChecklistItem(string username, int checklistId, int checklistItemId)
+        public async Task<IActionResult> DeleteChecklistItem(string username, int checklistId, int checklistItemId)
         {
-            var checklistItem = _checklistRepo.GetCheckListItemById(checklistItemId);
+            var checklistItem = await _checklistRepo.GetCheckListItemByIdAsync(checklistItemId);
             if (checklistItem == null)
                 return NotFound();
 
@@ -292,7 +295,7 @@ namespace JbaseChecklist.API.Controllers
             if (checklistItem?.Checklist?.User?.Username != username)
                 return Unauthorized();
 
-            _checklistRepo.DeleteChecklistItem(checklistItem);
+            await _checklistRepo.DeleteChecklistItemAsync(checklistItem);
 
             return new NoContentResult();
         }

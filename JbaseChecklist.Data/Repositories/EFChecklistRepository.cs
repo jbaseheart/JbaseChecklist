@@ -6,6 +6,7 @@ using System.Text;
 using JbaseChecklist.Domain.Models;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 
 namespace JbaseChecklist.Data.Repositories
 {
@@ -20,31 +21,31 @@ namespace JbaseChecklist.Data.Repositories
 
         #region Users
 
-        public IEnumerable<User> GetAllUsers()
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
         {
-            return _context.Users
+            return await _context.Users
                 .Include(u => u.CheckLists)
-                .ToList();
+                .ToListAsync();
         }
 
-        public User GetUserByUserName(string userName)
+        public async Task<User> GetUserByUserNameAsync(string userName)
         {
-            return _context.Users
+            return await _context.Users
                 .Include(u => u.CheckLists)
-                .FirstOrDefault(u => u.Username == userName);
+                .FirstOrDefaultAsync(u => u.Username == userName);
         }
         
-        public User GetUserByUserId(int userId)
+        public async Task<User> GetUserByUserIdAsync(int userId)
         {
-            return _context.Users
+            return await _context.Users
                 .Include(u => u.CheckLists)
-                .FirstOrDefault(u => u.Id == userId);
+                .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        public User CreateUser(User user)
+        public async Task<User> CreateUserAsync(User user)
         {
-            _context.Users.Add(user);
-            _context.SaveChanges();
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
 
             return user;
         }
@@ -53,89 +54,90 @@ namespace JbaseChecklist.Data.Repositories
 
         #region Checklists
         
-        public IEnumerable<Checklist> GetAllChecklistsByUserName(string userName)
+        public async Task<IEnumerable<Checklist>> GetAllChecklistsByUserNameAsync(string userName)
         {
-            return _context.CheckLists
+            return await _context.CheckLists
                 .Include(cl => cl.User)
                 .Include(cl => cl.ChecklistItems)
-                .Where(cl => cl.User.Username == userName);
+                .Where(cl => cl.User.Username == userName)
+                .ToListAsync();
         }
 
-        public Checklist GetChecklistById(int checklistId)
+        public async Task<Checklist> GetChecklistByIdAsync(int checklistId)
         {
-            return _context.CheckLists
+            return await _context.CheckLists
                 .Include(cl => cl.User)
                 .Include(cl => cl.ChecklistItems)
                 .Where(cl => cl.Id == checklistId)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public Checklist CreateCheckList(Checklist checklist)
+        public async Task<Checklist> CreateCheckListAsync(Checklist checklist)
         {
-            _context.CheckLists.Add(checklist);
-            _context.SaveChanges();
+            await _context.CheckLists.AddAsync(checklist);
+            await _context.SaveChangesAsync();
 
             return checklist;
         }
 
-        public Checklist UpdateCheckList(Checklist checklist)
+        public async Task<Checklist> UpdateCheckListAsync(Checklist checklist)
         {
             _context.CheckLists.Update(checklist);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return checklist;
         }
 
-        public void DeleteChecklist(Checklist checklist)
+        public async Task DeleteChecklistAsync(Checklist checklist)
         {
             _context.CheckLists.Remove(checklist);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         #endregion
 
         #region ChecklistItems
                 
-        public IEnumerable<ChecklistItem> GetAllChecklistItemsByChecklistId(int checklistId)
+        public async Task<IEnumerable<ChecklistItem>> GetAllChecklistItemsByChecklistIdAsync(int checklistId)
         {
-            return _context.CheckListItems.Where(cli => cli.ChecklistId == checklistId).ToList();
+            return await _context.CheckListItems.Where(cli => cli.ChecklistId == checklistId).ToListAsync();
         }
 
-        public ChecklistItem GetCheckListItemById(int id)
+        public async Task<ChecklistItem> GetCheckListItemByIdAsync(int id)
         {
-            return _context.CheckListItems
+            return await _context.CheckListItems
                 .Include(cli => cli.Checklist)
                     .ThenInclude(cl => cl.User)
                 .Where(cli => cli.Id == id)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public ChecklistItem CreateCheckListItem(ChecklistItem item)
+        public async Task<ChecklistItem> CreateCheckListItemAsync(ChecklistItem item)
         {
-            _context.CheckListItems.Add(item);
-            _context.SaveChanges();
+            await _context.CheckListItems.AddAsync(item);
+            await _context.SaveChangesAsync();
 
             return item;
         }
 
-        public ChecklistItem UpdateCheckListItem(ChecklistItem item)
+        public async Task<ChecklistItem> UpdateCheckListItemAsync(ChecklistItem item)
         {
             _context.CheckListItems.Update(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return item;
         }
 
-        public void DeleteChecklistItem(ChecklistItem item)
+        public async Task DeleteChecklistItemAsync(ChecklistItem item)
         {
             _context.CheckListItems.Remove(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteChecklistItems(IEnumerable<ChecklistItem> items)
+        public async Task DeleteChecklistItemsAsync(IEnumerable<ChecklistItem> items)
         {
             _context.CheckListItems.RemoveRange(items);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         #endregion

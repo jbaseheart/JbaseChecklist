@@ -27,9 +27,10 @@ namespace JbaseChecklist.API.Controllers
         /// <returns></returns>
         // GET api/Users
         [HttpGet]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = _checklistRepo.GetAllUsers().Select(u => new UserViewModel(u));
+            var users = await _checklistRepo.GetAllUsersAsync()
+                .ContinueWith(t => t.Result.Select(u => new UserViewModel(u)));
 
             return new ObjectResult(users);
         }
