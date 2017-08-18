@@ -20,6 +20,9 @@ namespace JbaseChecklist.API
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                //.UseAzureAppServices()
+                //.UseSetting("detailedErrors", "true")
+                //.CaptureStartupErrors(true)
                 .Build();
     }
 }
