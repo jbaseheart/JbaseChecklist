@@ -34,10 +34,9 @@
                 function success(response) {
                     $scope.checklistItems = response.data;
                 },
-                // callback function for error in http request
-                function error(response) {
-                    // log errors
-                }
+                LogError
+            );
+        }
             );
         }
 
@@ -46,9 +45,7 @@
                 function success(response) {
                     RefreshList();
                 },
-                function error(response) {
-                    // log errors
-                }
+                LogError
             );
         }
 
@@ -61,9 +58,7 @@
                 function success(response) {
                     RefreshList();                    
                 },
-                function error(response) {
-                    // log errors
-                }
+                LogError
             );
 
             //clear out the text box
@@ -75,10 +70,18 @@
                 function success(response) {
                     RefreshList();
                 },
-                function error(response) {
-                    // log errors
-                }
+                LogError
             );
+        }
+
+        function LogError(response) {
+            if (console) {
+                console.error('Error while attempting %s to %s \n Status: %s \n Message: %s',
+                    response.config.method,
+                    response.config.url,
+                    response.status,
+                    response.statusText);
+            }
         }
 
         activate();
@@ -91,10 +94,7 @@
                 function success(response) {
                     $scope.checklist = response.data;
                 },
-                // callback function for error in http request
-                function error(response) {
-                    // log errors
-                }
+                LogError
             );
 
             RefreshList();
