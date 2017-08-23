@@ -18,7 +18,7 @@
         $scope.username = username;
         $scope.checklistId = checklistId;
 
-
+        $scope.UpdateChecklist = UpdateChecklist;
         $scope.AddItem = AddItem;
         $scope.UpdateItem = UpdateItem;
         $scope.DeleteItem = DeleteItem;
@@ -37,6 +37,13 @@
                 LogError
             );
         }
+
+        function UpdateChecklist() {
+            checklistRepository.UpdateChecklist(username, checklistId, $scope.checklist.name, $scope.checklist.description).then(
+                function success(response) {
+                    //nothing to do
+                },
+                LogError
             );
         }
 

@@ -1,12 +1,15 @@
 ﻿
 <div class="page-header">
     <h1>
-        {{checklist.name}}
+        <span ng-hide="editingTitle" ng-click="editingTitle = !editingTitle; setFocus('title');">{{checklist.name}}</span>
+        <input id="title" type="text" ng-model="checklist.name" ng-show="editingTitle" ng-blur="editingTitle = !editingTitle; UpdateChecklist();"/>
     </h1>
 
     <p class="lead">
-        {{checklist.description}}
+        <span ng-hide="editingDescr" ng-click="editingDescr = !editingDescr; setFocus('description');">{{checklist.description}}</span>
+        <input id="description" type="text" ng-model="checklist.description" ng-show="editingDescr" ng-blur="editingDescr = !editingDescr; UpdateChecklist();" />
     </p>
+    <p class="small"><em>Click or tap an item to edit it</em></p>
 </div>
 
 <form name="checklistForm" class="checklistForm">
@@ -17,8 +20,8 @@
 <ul class="list-group">
     <li class="list-group-item" ng-repeat="item in checklistItems">
         <input type="checkbox" ng-model="item.isComplete" ng-click="UpdateItem(item)"/>
-        <span ng-class="{'done':item.isComplete}" ng-hide="editing" ng-click="editing = !editing;">{{item.description}}</span> 
-        <input type="text" ng-focus="true" ng-show="editing" ng-blur="editing = !editing; UpdateItem(item);" ng-model="item.description" />
+        <span ng-class="{'done':item.isComplete}" ng-hide="editing" ng-click="editing = !editing; setFocus('txtItem_' + item.id);">{{item.description}}</span> 
+        <input id="txtItem_{{item.id}}" type="text" ng-show="editing" ng-blur="editing = !editing; UpdateItem(item);" ng-model="item.description" />
         <span class="glyphicon glyphicon-remove delete" ng-click="DeleteItem(item.id)"> </span>
     </li>
 </ul>

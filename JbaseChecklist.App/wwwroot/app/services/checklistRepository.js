@@ -18,6 +18,15 @@
             return dataService.Get('/Checklist/' + username + '/' + checklistId);
         }
 
+        //updates a checklist
+        function UpdateChecklist(username, checklistId, name, description) {
+            return dataService.Put('/Checklist/' + username + '/' + checklistId, {
+                id: checklistId,
+                name: name,
+                description: description
+            });
+        }
+
         //gets all the items in a checklist
         function GetChecklistItems(username, checklistId) {
             return dataService.Get('/Checklist/' + username + '/' + checklistId + '/items');
@@ -50,6 +59,7 @@
         var service = {
             GetChecklists: GetChecklists,
             GetChecklist: GetChecklist,
+            UpdateChecklist: UpdateChecklist,
             GetChecklistItems: GetChecklistItems,
             AddChecklistItem: AddChecklistItem,
             UpdateChecklistItem: UpdateChecklistItem,
