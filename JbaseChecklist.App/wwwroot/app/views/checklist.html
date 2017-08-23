@@ -16,9 +16,9 @@
 
 <ul class="list-group">
     <li class="list-group-item" ng-repeat="item in checklistItems">
-        <input type="checkbox" ng-model="item.isComplete" />
+        <input type="checkbox" ng-model="item.isComplete" ng-click="UpdateItem(item)"/>
         <span ng-class="{'done':item.isComplete}" ng-hide="editing" ng-click="editing = !editing;">{{item.description}}</span> 
-        <input type="text" ng-focus="true" ng-show="editing" ng-blur="editing = !editing; Update(item);" ng-model="item.description" />
+        <input type="text" ng-focus="true" ng-show="editing" ng-blur="editing = !editing; UpdateItem(item);" ng-model="item.description" />
         <span class="glyphicon glyphicon-remove delete" ng-click="DeleteItem(item.id)"> </span>
     </li>
 </ul>

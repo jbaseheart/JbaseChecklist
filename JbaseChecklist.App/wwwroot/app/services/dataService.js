@@ -5,8 +5,6 @@
         .module('jbaseChecklist')
         .factory('dataService', ['$http', dataService]);
 
-    //dataService.$inject = ['$http'];
-
     function dataService($http) {
 
         var baseUrl = 'http://jbasechecklistapi.azurewebsites.net/api';
@@ -14,6 +12,7 @@
         var service = {
             Get: Get,
             Post: Post,
+            Put: Put,
             Delete: Delete
         };
 
@@ -29,6 +28,10 @@
 
         function Delete(url) {
             return $http.delete(baseUrl + url);
+        }
+
+        function Put(url, body) {
+            return $http.put(baseUrl + url, body);
         }
     }
 })();

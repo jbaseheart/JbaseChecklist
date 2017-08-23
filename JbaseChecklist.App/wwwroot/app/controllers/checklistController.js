@@ -20,6 +20,7 @@
 
 
         $scope.AddItem = AddItem;
+        $scope.UpdateItem = UpdateItem;
         $scope.DeleteItem = DeleteItem;
 
         function RefreshList() {
@@ -30,6 +31,17 @@
                     $scope.checklistItems = response.data;
                 },
                 // callback function for error in http request
+                function error(response) {
+                    // log errors
+                }
+            );
+        }
+
+        function UpdateItem(item) {
+            checklistRepository.UpdateChecklistItem(username, checklistId, item.id, item.description, item.isComplete).then(
+                function success(response) {
+                    RefreshList();
+                },
                 function error(response) {
                     // log errors
                 }

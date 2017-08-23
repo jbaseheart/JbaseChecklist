@@ -32,6 +32,17 @@
             });
         }
 
+        //updates an item in the list
+        function UpdateChecklistItem(username, checklistId, checklistItemId, description, isComplete) {
+            return dataService.Put('/Checklist/' + username + '/' + checklistId + '/items/' + checklistItemId, {
+                id: checklistItemId,
+                checklistId: checklistId,
+                description: description,
+                isComplete: isComplete
+            });
+        }
+
+        //deletes an item from the list
         function DeleteChecklistItem(username, checklistId, checklistItemId) {
             return dataService.Delete('/Checklist/' + username + '/' + checklistId + '/items/' + checklistItemId);
         }
@@ -41,6 +52,7 @@
             GetChecklist: GetChecklist,
             GetChecklistItems: GetChecklistItems,
             AddChecklistItem: AddChecklistItem,
+            UpdateChecklistItem: UpdateChecklistItem,
             DeleteChecklistItem: DeleteChecklistItem
         };
 
