@@ -3,11 +3,11 @@
 
     angular
         .module('jbaseChecklist')
-        .controller('checklistController', ['$scope', '$routeParams', '$location', 'checklistRepository', checklistController]);
+        .controller('checklistController', ['$scope', '$routeParams', '$location', 'checklistRepository', 'focus', checklistController]);
 
     //checklistController.$inject = ['$scope'];
 
-    function checklistController($scope, $routeParams, $location, checklistRepository) {
+    function checklistController($scope, $routeParams, $location, checklistRepository, focus) {
 
         $scope.checklist = {};
         $scope.checklistItems = [];
@@ -22,6 +22,10 @@
         $scope.AddItem = AddItem;
         $scope.UpdateItem = UpdateItem;
         $scope.DeleteItem = DeleteItem;
+
+        $scope.setFocus = function (id) {
+            focus(id);
+        }
 
         function RefreshList() {
             //get the individual items in the checklist
