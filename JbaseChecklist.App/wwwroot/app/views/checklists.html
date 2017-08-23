@@ -1,0 +1,10 @@
+﻿
+<h1>
+    Checklists for {{username}}
+</h1>
+
+<ul class="list-group">
+    <li class="list-group-item" ng-repeat="checklist in checklists">
+        <a ng-click="SelectChecklist(checklist.id)">{{checklist.name}}</a>
+    </li>
+</ul>

@@ -1,0 +1,24 @@
+﻿
+<div class="page-header">
+    <h1>
+        {{checklist.name}}
+    </h1>
+
+    <p class="lead">
+        {{checklist.description}}
+    </p>
+</div>
+
+<form name="checklistForm" class="checklistForm">
+    <input id="newItemText" type="text" class="form-control" ng-model="newItemText" placeholder="Add new item" />     
+    <button type="button" id="btnAdd" class="btn btn-primary" ng-click="AddItem()">Add</button>
+</form>
+
+<ul class="list-group">
+    <li class="list-group-item" ng-repeat="item in checklistItems">
+        <input type="checkbox" ng-model="item.isComplete" />
+        <span ng-class="{'done':item.isComplete}" ng-hide="editing" ng-click="editing = !editing;">{{item.description}}</span> 
+        <input type="text" ng-focus="true" ng-show="editing" ng-blur="editing = !editing; Update(item);" ng-model="item.description" />
+        <span class="glyphicon glyphicon-remove delete" ng-click="DeleteItem(item.id)"> </span>
+    </li>
+</ul>
