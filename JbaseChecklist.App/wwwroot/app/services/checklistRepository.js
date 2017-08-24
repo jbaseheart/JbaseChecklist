@@ -35,6 +35,11 @@
             });
         }
 
+        //delete a checklist
+        function DeleteChecklist(username, checklistId) {
+            return dataService.Delete('/Checklist/' + username + '/' + checklistId);
+        }
+
         //gets all the items in a checklist
         function GetChecklistItems(username, checklistId) {
             return dataService.Get('/Checklist/' + username + '/' + checklistId + '/items');
@@ -69,6 +74,7 @@
             GetChecklist: GetChecklist,
             AddChecklist: AddChecklist,
             UpdateChecklist: UpdateChecklist,
+            DeleteChecklist: DeleteChecklist,
             GetChecklistItems: GetChecklistItems,
             AddChecklistItem: AddChecklistItem,
             UpdateChecklistItem: UpdateChecklistItem,

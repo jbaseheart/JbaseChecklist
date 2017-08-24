@@ -6,6 +6,8 @@
 <ul class="list-group">
     <li class="list-group-item" ng-repeat="checklist in checklists">
         <a ng-click="SelectChecklist(checklist.id)">{{checklist.name}}</a>
+        <span class="glyphicon glyphicon-remove delete" ng-click="DeleteChecklist(checklist.id)"> </span>
     </li>
 </ul>
+
 <button type="button" id="btnNew" class="btn btn-primary" ng-click="NewChecklist()">Create a new checklist</button>

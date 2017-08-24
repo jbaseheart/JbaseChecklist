@@ -29,8 +29,8 @@
 }
 
 .list-group-item span.delete {
-    float:right;
-    color:tomato;
+    float: right;
+    color: tomato;
     cursor: pointer;
 }
 

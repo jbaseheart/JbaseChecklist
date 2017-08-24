@@ -5,8 +5,6 @@
         .module('jbaseChecklist')
         .controller('checklistController', ['$scope', '$routeParams', '$location', 'checklistRepository', 'focus', checklistController]);
 
-    //checklistController.$inject = ['$scope'];
-
     function checklistController($scope, $routeParams, $location, checklistRepository, focus) {
 
         $scope.checklist = {};
