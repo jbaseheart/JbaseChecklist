@@ -9,19 +9,23 @@
 
     function checklistsController($scope, $routeParams, $location, checklistRepository) {
 
+        $scope.checklists = [];
+        $scope.NewChecklist = NewChecklist;
+
+        var username = $routeParams.username;
+        $scope.username = username;
+
+        $scope.SelectChecklist = function (checklistId) {
+            $location.path('/checklists/' + username + '/' + checklistId);
+        }
+
+        function NewChecklist() {
+            $location.path('/checklists/' + username + '/new');
+        }
+
         activate();
 
         function activate() {
-
-            $scope.checklists = [];
-
-            var username = $routeParams.username;
-            $scope.username = username;
-
-            $scope.SelectChecklist = function (checklistId) {
-                $location.path('/checklists/' + username + '/' + checklistId);
-            }
-
             //get the checklists for the current user
             checklistRepository.GetChecklists(username).then(
                 // callback function for successful http request

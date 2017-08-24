@@ -14,9 +14,18 @@
     margin: 10px auto;
 }
 
+.checklistForm input {
+    margin-bottom:15px;
+}
+
 #newItemText {
     display:inline;
     width: 315px;
+}
+
+.list-group-item a {
+    text-decoration:none;
+    cursor:pointer;
 }
 
 .list-group-item span.delete {

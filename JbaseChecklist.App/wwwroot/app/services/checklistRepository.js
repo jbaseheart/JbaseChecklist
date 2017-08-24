@@ -13,6 +13,14 @@
             return dataService.Get('/Checklist/' + username);
         }
 
+        //adds a new checklist
+        function AddChecklist(username, name, description) {
+            return dataService.Post('/Checklist/' + username, {
+                name: name,
+                description: description
+            });
+        }
+
         //get a specific checklist
         function GetChecklist(username, checklistId) {
             return dataService.Get('/Checklist/' + username + '/' + checklistId);
@@ -59,6 +67,7 @@
         var service = {
             GetChecklists: GetChecklists,
             GetChecklist: GetChecklist,
+            AddChecklist: AddChecklist,
             UpdateChecklist: UpdateChecklist,
             GetChecklistItems: GetChecklistItems,
             AddChecklistItem: AddChecklistItem,

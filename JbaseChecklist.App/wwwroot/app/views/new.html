@@ -1,0 +1,18 @@
+﻿
+<h1>Create a new checklist</h1>
+
+<div>
+    <div class="alert alert-danger" ng-hide="valid">
+        Name and description cannot be blank.
+    </div>
+    <form name="checklistForm" class="checklistForm">
+        <label class="" for="name">Name:</label>
+        <input type="text" id="name" class="form-control" ng-model="name"/>
+
+        <label class="" for="description">Description</label>
+        <input type="text" id="description" class="form-control" ng-model="description"/>
+        
+        <button type="button" class="btn btn-primary" ng-click="ValidateAndSubmit()">Create</button>
+    </form>
+
+</div>

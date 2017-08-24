@@ -4,11 +4,6 @@
     var jbaseChecklist = angular.module('jbaseChecklist', [
         // Angular modules 
         'ngRoute'
-
-        // Custom modules 
-
-        // 3rd Party Modules
-
     ])
     .config(['$routeProvider',
         function ($routeProvider) {
@@ -16,6 +11,10 @@
                 when('/users', {
                     templateUrl: '/app/views/users.html',
                     controller: 'usersController'
+                }).
+                when('/checklists/:username/new', {
+                    templateUrl: '/app/views/new.html',
+                    controller: 'newChecklistController'
                 }).
                 when('/checklists/:username', {
                     templateUrl: '/app/views/checklists.html',
